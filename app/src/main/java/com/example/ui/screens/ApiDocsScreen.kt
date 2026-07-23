@@ -60,7 +60,7 @@ fun ApiDocsScreen(modifier: Modifier = Modifier) {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Panduan teknis pengembang untuk Shield Browser AdBlock Engine",
+                        text = "Panduan teknis pengembang untuk NimbusV3 AdBlock Engine",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

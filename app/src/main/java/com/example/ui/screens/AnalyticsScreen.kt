@@ -310,7 +310,7 @@ fun AnalyticsScreen(
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "Peramban Shield Browser telah mengamankan koneksi Anda dengan memblokir $monthlyCount ancaman/iklan bulan ini, menghemat perkiraan $dataSavedMb MB kuota internet serta mempercepat waktu pemuatan web hingga 35%.",
+                        text = "Peramban NimbusV3 telah mengamankan koneksi Anda dengan memblokir $monthlyCount ancaman/iklan bulan ini, menghemat perkiraan $dataSavedMb MB kuota internet serta mempercepat waktu pemuatan web hingga 35%.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f)
                     )

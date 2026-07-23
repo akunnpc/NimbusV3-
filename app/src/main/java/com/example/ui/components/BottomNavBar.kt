@@ -1,9 +1,12 @@
 package com.example.ui.components
 
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Security
@@ -33,31 +36,36 @@ import com.example.ui.theme.Slate500
 fun BottomNavBar(
     selectedTab: NavigationTab,
     alertsCount: Int,
+    downloadsCount: Int = 0,
     onTabSelected: (NavigationTab) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = modifier.clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
-        shadowElevation = 8.dp,
-        color = MaterialTheme.colorScheme.surface
+        modifier = modifier
+            .navigationBarsPadding()
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(28.dp)),
+        shadowElevation = 10.dp,
+        color = MaterialTheme.colorScheme.surfaceContainerHigh ?: MaterialTheme.colorScheme.surface,
+        tonalElevation = 6.dp
     ) {
         NavigationBar(
-            containerColor = MaterialTheme.colorScheme.surface,
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh ?: MaterialTheme.colorScheme.surface,
             tonalElevation = 0.dp
         ) {
             val itemColors = NavigationBarItemDefaults.colors(
-                selectedIconColor = Indigo600,
-                selectedTextColor = Indigo600,
-                indicatorColor = Indigo600.copy(alpha = 0.12f),
-                unselectedIconColor = Slate500,
-                unselectedTextColor = Slate500
+                selectedIconColor = MaterialTheme.colorScheme.primary,
+                selectedTextColor = MaterialTheme.colorScheme.primary,
+                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
+                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
 
             NavigationBarItem(
                 selected = selectedTab == NavigationTab.BROWSER,
                 onClick = { onTabSelected(NavigationTab.BROWSER) },
                 icon = { Icon(imageVector = Icons.Default.Web, contentDescription = "Browser") },
-                label = { Text("Browser", fontSize = 11.sp, fontWeight = if (selectedTab == NavigationTab.BROWSER) FontWeight.Bold else FontWeight.Normal) },
+                label = { Text("Browser", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.BROWSER) FontWeight.Bold else FontWeight.Normal) },
                 colors = itemColors,
                 modifier = Modifier.testTag("nav_tab_browser")
             )
@@ -66,7 +74,7 @@ fun BottomNavBar(
                 selected = selectedTab == NavigationTab.ANALYTICS,
                 onClick = { onTabSelected(NavigationTab.ANALYTICS) },
                 icon = { Icon(imageVector = Icons.Default.Assessment, contentDescription = "Analitik") },
-                label = { Text("Analitik", fontSize = 11.sp, fontWeight = if (selectedTab == NavigationTab.ANALYTICS) FontWeight.Bold else FontWeight.Normal) },
+                label = { Text("Analitik", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.ANALYTICS) FontWeight.Bold else FontWeight.Normal) },
                 colors = itemColors,
                 modifier = Modifier.testTag("nav_tab_analytics")
             )
@@ -75,7 +83,7 @@ fun BottomNavBar(
                 selected = selectedTab == NavigationTab.WHITELIST,
                 onClick = { onTabSelected(NavigationTab.WHITELIST) },
                 icon = { Icon(imageVector = Icons.Default.Security, contentDescription = "Daftar Putih") },
-                label = { Text("Whitelist", fontSize = 11.sp, fontWeight = if (selectedTab == NavigationTab.WHITELIST) FontWeight.Bold else FontWeight.Normal) },
+                label = { Text("Whitelist", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.WHITELIST) FontWeight.Bold else FontWeight.Normal) },
                 colors = itemColors,
                 modifier = Modifier.testTag("nav_tab_whitelist")
             )
@@ -84,9 +92,30 @@ fun BottomNavBar(
                 selected = selectedTab == NavigationTab.HISTORY,
                 onClick = { onTabSelected(NavigationTab.HISTORY) },
                 icon = { Icon(imageVector = Icons.Default.History, contentDescription = "Riwayat") },
-                label = { Text("Riwayat", fontSize = 11.sp, fontWeight = if (selectedTab == NavigationTab.HISTORY) FontWeight.Bold else FontWeight.Normal) },
+                label = { Text("Riwayat", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.HISTORY) FontWeight.Bold else FontWeight.Normal) },
                 colors = itemColors,
                 modifier = Modifier.testTag("nav_tab_history")
+            )
+
+            NavigationBarItem(
+                selected = selectedTab == NavigationTab.DOWNLOADS,
+                onClick = { onTabSelected(NavigationTab.DOWNLOADS) },
+                icon = {
+                    BadgedBox(
+                        badge = {
+                            if (downloadsCount > 0) {
+                                Badge(containerColor = MaterialTheme.colorScheme.primary) {
+                                    Text(text = if (downloadsCount > 9) "9+" else downloadsCount.toString(), color = Color.White)
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(imageVector = Icons.Default.Download, contentDescription = "Unduhan")
+                    }
+                },
+                label = { Text("Unduhan", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.DOWNLOADS) FontWeight.Bold else FontWeight.Normal) },
+                colors = itemColors,
+                modifier = Modifier.testTag("nav_tab_downloads")
             )
 
             NavigationBarItem(
@@ -105,7 +134,7 @@ fun BottomNavBar(
                         Icon(imageVector = Icons.Default.NotificationsActive, contentDescription = "Alerts")
                     }
                 },
-                label = { Text("Alerts", fontSize = 11.sp, fontWeight = if (selectedTab == NavigationTab.ALERTS) FontWeight.Bold else FontWeight.Normal) },
+                label = { Text("Alerts", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.ALERTS) FontWeight.Bold else FontWeight.Normal) },
                 colors = itemColors,
                 modifier = Modifier.testTag("nav_tab_alerts")
             )
@@ -114,7 +143,7 @@ fun BottomNavBar(
                 selected = selectedTab == NavigationTab.API_DOCS,
                 onClick = { onTabSelected(NavigationTab.API_DOCS) },
                 icon = { Icon(imageVector = Icons.Default.Code, contentDescription = "Dokumentasi API") },
-                label = { Text("Docs", fontSize = 11.sp, fontWeight = if (selectedTab == NavigationTab.API_DOCS) FontWeight.Bold else FontWeight.Normal) },
+                label = { Text("Docs", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.API_DOCS) FontWeight.Bold else FontWeight.Normal) },
                 colors = itemColors,
                 modifier = Modifier.testTag("nav_tab_docs")
             )

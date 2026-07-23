@@ -1,5 +1,5 @@
 {
-  "name": "Shield Browser",
+  "name": "NimbusV3",
   "description": "Simple Android web browser with built-in automatic ad blocker, whitelist, session management, and analytics dashboard.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]

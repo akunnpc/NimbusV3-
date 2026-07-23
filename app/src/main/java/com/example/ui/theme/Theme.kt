@@ -12,28 +12,28 @@ import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme =
     darkColorScheme(
-        primary = Indigo500,
+        primary = NimbusSky500,
         onPrimary = androidx.compose.ui.graphics.Color.White,
-        primaryContainer = Indigo700,
-        onPrimaryContainer = Indigo100,
+        primaryContainer = NimbusSky700,
+        onPrimaryContainer = NimbusSky100,
         secondary = Slate500,
-        background = Slate900,
-        surface = Slate800,
+        background = NimbusMidnight900,
+        surface = NimbusMidnight800,
         onBackground = Slate50,
         onSurface = Slate50,
-        surfaceVariant = Slate700,
+        surfaceVariant = NimbusMidnight700,
         onSurfaceVariant = Slate200,
         outline = Slate500
     )
 
 private val LightColorScheme =
     lightColorScheme(
-        primary = Indigo600,
+        primary = NimbusSky600,
         onPrimary = androidx.compose.ui.graphics.Color.White,
-        primaryContainer = Indigo50,
-        onPrimaryContainer = Indigo700,
+        primaryContainer = NimbusSky50,
+        onPrimaryContainer = NimbusSky700,
         secondary = Slate500,
-        background = androidx.compose.ui.graphics.Color(0xFFF3F6FA),
+        background = androidx.compose.ui.graphics.Color(0xFFF0F7FF),
         surface = androidx.compose.ui.graphics.Color.White,
         onBackground = Slate900,
         onSurface = Slate900,

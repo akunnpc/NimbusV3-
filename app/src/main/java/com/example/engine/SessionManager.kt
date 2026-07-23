@@ -11,6 +11,9 @@ object SessionManager {
      * Initializes WebView settings for persistent user sessions, logins, and storage.
      */
     fun configureWebViewSession(webView: WebView) {
+        // Hardware Acceleration
+        webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
+
         val settings = webView.settings
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
@@ -20,6 +23,13 @@ object SessionManager {
         settings.setSupportZoom(true)
         settings.builtInZoomControls = true
         settings.displayZoomControls = false
+
+        // Performance & Rendering Boost
+        settings.offscreenPreRaster = true
+        settings.cacheMode = android.webkit.WebSettings.LOAD_DEFAULT
+        settings.allowContentAccess = true
+        settings.allowFileAccess = false
+        settings.mixedContentMode = android.webkit.WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
 
         // Enable third-party cookies for seamless login sessions across OAuth providers
         val cookieManager = CookieManager.getInstance()
