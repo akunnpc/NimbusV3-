@@ -58,6 +58,15 @@ jobs:
           cp .env.example .env
         fi
 
+    - name: Generate debug keystore
+      run: |
+        keytool -genkey -v -keystore debug.keystore \
+          -keyalg RSA -keysize 2048 -validity 10000 \
+          -alias androiddebugkey -keypass android \
+          -storepass android \
+          -dname "CN=Android Debug,O=Android,C=US" \
+          -noprompt
+
     - name: Build debug APK
       run: ./gradlew assembleDebug --stacktrace
 
@@ -119,6 +128,15 @@ jobs:
         if [ ! -f .env ] && [ -f .env.example ]; then
           cp .env.example .env
         fi
+
+    - name: Generate debug keystore
+      run: |
+        keytool -genkey -v -keystore debug.keystore \
+          -keyalg RSA -keysize 2048 -validity 10000 \
+          -alias androiddebugkey -keypass android \
+          -storepass android \
+          -dname "CN=Android Debug,O=Android,C=US" \
+          -noprompt
 
     - name: Run Android Lint
       run: ./gradlew lintDebug --stacktrace
