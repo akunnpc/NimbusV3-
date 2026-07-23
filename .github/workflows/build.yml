@@ -26,7 +26,6 @@ jobs:
       with:
         fetch-depth: 0
 
-    # AGP di project ini versi 9.1.1 -> WAJIB JDK 21 (bukan 17).
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
@@ -42,6 +41,13 @@ jobs:
 
     - name: Set up Gradle
       uses: gradle/actions/setup-gradle@v4
+
+    - name: Generate Gradle wrapper if missing
+      run: |
+        if [ ! -f gradlew ]; then
+          echo "gradlew tidak ditemukan, generate wrapper otomatis..."
+          gradle wrapper --gradle-version 8.13
+        fi
 
     - name: Make gradlew executable
       run: chmod +x gradlew
@@ -97,6 +103,13 @@ jobs:
 
     - name: Set up Gradle
       uses: gradle/actions/setup-gradle@v4
+
+    - name: Generate Gradle wrapper if missing
+      run: |
+        if [ ! -f gradlew ]; then
+          echo "gradlew tidak ditemukan, generate wrapper otomatis..."
+          gradle wrapper --gradle-version 8.13
+        fi
 
     - name: Make gradlew executable
       run: chmod +x gradlew
