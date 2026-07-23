@@ -46,7 +46,7 @@ jobs:
       run: |
         if [ ! -f gradlew ]; then
           echo "gradlew tidak ditemukan, generate wrapper otomatis..."
-          gradle wrapper --gradle-version 8.13
+          gradle wrapper --gradle-version 9.3.1
         fi
 
     - name: Make gradlew executable
@@ -108,7 +108,7 @@ jobs:
       run: |
         if [ ! -f gradlew ]; then
           echo "gradlew tidak ditemukan, generate wrapper otomatis..."
-          gradle wrapper --gradle-version 8.13
+          gradle wrapper --gradle-version 9.3.1
         fi
 
     - name: Make gradlew executable
