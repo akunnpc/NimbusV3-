@@ -3,21 +3,45 @@ package com.example
 import android.os.Bundle
 import android.webkit.WebView
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.BrowserViewModel
@@ -80,6 +104,34 @@ fun NimbusV3App(viewModel: BrowserViewModel = viewModel()) {
         whitelistedSites.map { it.domain }.toSet()
     }
 
+    // System Back Press Navigation Handler
+    val hasOpenDialog = state.isTabSwitcherOpen ||
+            state.isSearchEngineDialogOpen ||
+            state.isZoomDialogOpen ||
+            state.isClearDataDialogOpen ||
+            state.isQrDialogOpen ||
+            state.isFindInPageOpen
+
+    val isNotOnBrowserTab = state.selectedTab != NavigationTab.BROWSER
+    val isOnWebPage = state.currentUrl.isNotEmpty() && state.currentUrl != "about:blank"
+    val canGoBackInWeb = webViewInstance?.canGoBack() == true
+
+    val shouldHandleBack = hasOpenDialog || isNotOnBrowserTab || canGoBackInWeb || isOnWebPage
+
+    BackHandler(enabled = shouldHandleBack) {
+        when {
+            state.isTabSwitcherOpen -> viewModel.openTabSwitcher(false)
+            state.isSearchEngineDialogOpen -> viewModel.openSearchEngineDialog(false)
+            state.isZoomDialogOpen -> viewModel.openZoomDialog(false)
+            state.isClearDataDialogOpen -> viewModel.openClearDataDialog(false)
+            state.isQrDialogOpen -> viewModel.openQrDialog(false)
+            state.isFindInPageOpen -> viewModel.openFindInPage(false)
+            state.selectedTab != NavigationTab.BROWSER -> viewModel.selectTab(NavigationTab.BROWSER)
+            webViewInstance?.canGoBack() == true -> webViewInstance?.goBack()
+            state.currentUrl.isNotEmpty() && state.currentUrl != "about:blank" -> viewModel.loadUrl("")
+        }
+    }
+
     // Modal Overlays
     if (state.isTabSwitcherOpen) {
         TabSwitcherSheet(
@@ -131,8 +183,24 @@ fun NimbusV3App(viewModel: BrowserViewModel = viewModel()) {
         )
     }
 
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                val delta = available.y
+                if (delta < -20f) {
+                    viewModel.setBottomBarVisible(false)
+                } else if (delta > 20f) {
+                    viewModel.setBottomBarVisible(true)
+                }
+                return Offset.Zero
+            }
+        }
+    }
+
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .nestedScroll(nestedScrollConnection),
         topBar = {
             TopAddressBar(
                 state = state,
@@ -158,12 +226,18 @@ fun NimbusV3App(viewModel: BrowserViewModel = viewModel()) {
             )
         },
         bottomBar = {
-            BottomNavBar(
-                selectedTab = state.selectedTab,
-                alertsCount = securityAlerts.size,
-                downloadsCount = state.downloads.size,
-                onTabSelected = viewModel::selectTab
-            )
+            AnimatedVisibility(
+                visible = state.isBottomBarVisible,
+                enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+            ) {
+                BottomNavBar(
+                    selectedTab = state.selectedTab,
+                    alertsCount = securityAlerts.size,
+                    downloadsCount = state.downloads.size,
+                    onTabSelected = viewModel::selectTab
+                )
+            }
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { innerPadding ->
@@ -184,6 +258,10 @@ fun NimbusV3App(viewModel: BrowserViewModel = viewModel()) {
                             onAdBlocked = viewModel::recordAdBlocked,
                             onDownloadStarted = viewModel::addDownload,
                             onFindMatches = viewModel::updateFindMatches,
+                            onScrollDirectionChanged = viewModel::setBottomBarVisible,
+                            onToggleIncognito = viewModel::toggleIncognitoForActiveTab,
+                            onOpenQrDialog = { viewModel.openQrDialog(true) },
+                            onOpenSearchEngineDialog = { viewModel.openSearchEngineDialog(true) },
                             webViewRef = { webViewInstance = it }
                         )
 
@@ -197,7 +275,7 @@ fun NimbusV3App(viewModel: BrowserViewModel = viewModel()) {
                                     webViewInstance?.findNext(forward)
                                 },
                                 onClose = { viewModel.openFindInPage(false) },
-                                modifier = Modifier.align(androidx.compose.ui.Alignment.TopCenter)
+                                modifier = Modifier.align(Alignment.TopCenter)
                             )
                         }
                     }
@@ -252,6 +330,42 @@ fun NimbusV3App(viewModel: BrowserViewModel = viewModel()) {
 
                 NavigationTab.API_DOCS -> {
                     ApiDocsScreen()
+                }
+            }
+
+            // Floating pill button to quickly reveal bottom bar when auto-hidden
+            AnimatedVisibility(
+                visible = !state.isBottomBarVisible,
+                enter = fadeIn() + slideInVertically(initialOffsetY = { it / 2 }),
+                exit = fadeOut() + slideOutVertically(targetOffsetY = { it / 2 }),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 16.dp)
+            ) {
+                Surface(
+                    onClick = { viewModel.setBottomBarVisible(true) },
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.95f),
+                    shadowElevation = 8.dp
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = "Tampilkan Menu",
+                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = "Menu",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
                 }
             }
         }

@@ -37,6 +37,10 @@ fun BrowserWebView(
     onAdBlocked: (String) -> Unit,
     onDownloadStarted: (fileName: String, url: String, mimeType: String, fileSize: String) -> Unit,
     onFindMatches: (activeMatchIndex: Int, numberOfMatches: Int) -> Unit = { _, _ -> },
+    onScrollDirectionChanged: (Boolean) -> Unit = {},
+    onToggleIncognito: () -> Unit = {},
+    onOpenQrDialog: () -> Unit = {},
+    onOpenSearchEngineDialog: () -> Unit = {},
     webViewRef: (WebView?) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -49,6 +53,22 @@ fun BrowserWebView(
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             SessionManager.configureWebViewSession(this)
+        }
+    }
+
+    // Auto hide/show bottom bar on web view scroll
+    DisposableEffect(webView) {
+        val listener = android.view.View.OnScrollChangeListener { _, _, scrollY, _, oldScrollY ->
+            val dy = scrollY - oldScrollY
+            if (dy > 15 && scrollY > 60) {
+                onScrollDirectionChanged(false) // Scroll down -> hide bottom bar
+            } else if (dy < -15) {
+                onScrollDirectionChanged(true) // Scroll up -> show bottom bar
+            }
+        }
+        webView.setOnScrollChangeListener(listener)
+        onDispose {
+            webView.setOnScrollChangeListener(null)
         }
     }
 
@@ -276,7 +296,10 @@ fun BrowserWebView(
                 state = state,
                 onNavigateUrl = { targetUrl ->
                     webView.loadUrl(targetUrl)
-                }
+                },
+                onToggleIncognito = onToggleIncognito,
+                onOpenQrDialog = onOpenQrDialog,
+                onOpenSearchEngineDialog = onOpenSearchEngineDialog
             )
         }
     }

@@ -1,7 +1,17 @@
 package com.example.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assessment
@@ -15,22 +25,19 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.NavigationTab
-import com.example.ui.theme.Indigo600
-import com.example.ui.theme.Slate500
 
 @Composable
 fun BottomNavBar(
@@ -43,110 +50,145 @@ fun BottomNavBar(
     Surface(
         modifier = modifier
             .navigationBarsPadding()
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-            .clip(RoundedCornerShape(28.dp)),
-        shadowElevation = 10.dp,
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        shadowElevation = 8.dp,
         color = MaterialTheme.colorScheme.surfaceContainerHigh ?: MaterialTheme.colorScheme.surface,
         tonalElevation = 6.dp
     ) {
-        NavigationBar(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh ?: MaterialTheme.colorScheme.surface,
-            tonalElevation = 0.dp
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 6.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            val itemColors = NavigationBarItemDefaults.colors(
-                selectedIconColor = MaterialTheme.colorScheme.primary,
-                selectedTextColor = MaterialTheme.colorScheme.primary,
-                indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-            )
-
-            NavigationBarItem(
+            NavItemBox(
                 selected = selectedTab == NavigationTab.BROWSER,
                 onClick = { onTabSelected(NavigationTab.BROWSER) },
-                icon = { Icon(imageVector = Icons.Default.Web, contentDescription = "Browser") },
-                label = { Text("Browser", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.BROWSER) FontWeight.Bold else FontWeight.Normal) },
-                colors = itemColors,
-                modifier = Modifier.testTag("nav_tab_browser")
+                icon = Icons.Default.Web,
+                contentDescription = "Browser",
+                testTag = "nav_tab_browser"
             )
 
-            NavigationBarItem(
+            NavItemBox(
                 selected = selectedTab == NavigationTab.ANALYTICS,
                 onClick = { onTabSelected(NavigationTab.ANALYTICS) },
-                icon = { Icon(imageVector = Icons.Default.Assessment, contentDescription = "Analitik") },
-                label = { Text("Analitik", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.ANALYTICS) FontWeight.Bold else FontWeight.Normal) },
-                colors = itemColors,
-                modifier = Modifier.testTag("nav_tab_analytics")
+                icon = Icons.Default.Assessment,
+                contentDescription = "Analitik",
+                testTag = "nav_tab_analytics"
             )
 
-            NavigationBarItem(
+            NavItemBox(
                 selected = selectedTab == NavigationTab.WHITELIST,
                 onClick = { onTabSelected(NavigationTab.WHITELIST) },
-                icon = { Icon(imageVector = Icons.Default.Security, contentDescription = "Daftar Putih") },
-                label = { Text("Whitelist", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.WHITELIST) FontWeight.Bold else FontWeight.Normal) },
-                colors = itemColors,
-                modifier = Modifier.testTag("nav_tab_whitelist")
+                icon = Icons.Default.Security,
+                contentDescription = "Daftar Putih",
+                testTag = "nav_tab_whitelist"
             )
 
-            NavigationBarItem(
+            NavItemBox(
                 selected = selectedTab == NavigationTab.HISTORY,
                 onClick = { onTabSelected(NavigationTab.HISTORY) },
-                icon = { Icon(imageVector = Icons.Default.History, contentDescription = "Riwayat") },
-                label = { Text("Riwayat", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.HISTORY) FontWeight.Bold else FontWeight.Normal) },
-                colors = itemColors,
-                modifier = Modifier.testTag("nav_tab_history")
+                icon = Icons.Default.History,
+                contentDescription = "Riwayat",
+                testTag = "nav_tab_history"
             )
 
-            NavigationBarItem(
+            NavItemBox(
                 selected = selectedTab == NavigationTab.DOWNLOADS,
                 onClick = { onTabSelected(NavigationTab.DOWNLOADS) },
-                icon = {
-                    BadgedBox(
-                        badge = {
-                            if (downloadsCount > 0) {
-                                Badge(containerColor = MaterialTheme.colorScheme.primary) {
-                                    Text(text = if (downloadsCount > 9) "9+" else downloadsCount.toString(), color = Color.White)
-                                }
-                            }
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Default.Download, contentDescription = "Unduhan")
-                    }
-                },
-                label = { Text("Unduhan", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.DOWNLOADS) FontWeight.Bold else FontWeight.Normal) },
-                colors = itemColors,
-                modifier = Modifier.testTag("nav_tab_downloads")
+                icon = Icons.Default.Download,
+                badgeCount = downloadsCount,
+                badgeColor = MaterialTheme.colorScheme.primary,
+                contentDescription = "Unduhan",
+                testTag = "nav_tab_downloads"
             )
 
-            NavigationBarItem(
+            NavItemBox(
                 selected = selectedTab == NavigationTab.ALERTS,
                 onClick = { onTabSelected(NavigationTab.ALERTS) },
-                icon = {
-                    BadgedBox(
-                        badge = {
-                            if (alertsCount > 0) {
-                                Badge(containerColor = MaterialTheme.colorScheme.error) {
-                                    Text(text = if (alertsCount > 9) "9+" else alertsCount.toString(), color = Color.White)
-                                }
-                            }
-                        }
-                    ) {
-                        Icon(imageVector = Icons.Default.NotificationsActive, contentDescription = "Alerts")
-                    }
-                },
-                label = { Text("Alerts", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.ALERTS) FontWeight.Bold else FontWeight.Normal) },
-                colors = itemColors,
-                modifier = Modifier.testTag("nav_tab_alerts")
+                icon = Icons.Default.NotificationsActive,
+                badgeCount = alertsCount,
+                badgeColor = MaterialTheme.colorScheme.error,
+                contentDescription = "Alerts",
+                testTag = "nav_tab_alerts"
             )
 
-            NavigationBarItem(
+            NavItemBox(
                 selected = selectedTab == NavigationTab.API_DOCS,
                 onClick = { onTabSelected(NavigationTab.API_DOCS) },
-                icon = { Icon(imageVector = Icons.Default.Code, contentDescription = "Dokumentasi API") },
-                label = { Text("Docs", fontSize = 10.sp, fontWeight = if (selectedTab == NavigationTab.API_DOCS) FontWeight.Bold else FontWeight.Normal) },
-                colors = itemColors,
-                modifier = Modifier.testTag("nav_tab_docs")
+                icon = Icons.Default.Code,
+                contentDescription = "Dokumentasi API",
+                testTag = "nav_tab_docs"
             )
         }
     }
 }
+
+@Composable
+private fun NavItemBox(
+    selected: Boolean,
+    onClick: () -> Unit,
+    icon: ImageVector,
+    contentDescription: String,
+    testTag: String,
+    badgeCount: Int = 0,
+    badgeColor: Color = MaterialTheme.colorScheme.primary
+) {
+    val containerColor = if (selected) {
+        MaterialTheme.colorScheme.primaryContainer
+    } else {
+        Color.Transparent
+    }
+
+    val iconColor = if (selected) {
+        MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+    }
+
+    Box(
+        modifier = Modifier
+            .size(42.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(containerColor)
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = onClick
+            )
+            .testTag(testTag),
+        contentAlignment = Alignment.Center
+    ) {
+        if (badgeCount > 0) {
+            BadgedBox(
+                badge = {
+                    Badge(containerColor = badgeColor) {
+                        Text(
+                            text = if (badgeCount > 9) "9+" else badgeCount.toString(),
+                            color = Color.White,
+                            fontSize = 9.sp
+                        )
+                    }
+                }
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = contentDescription,
+                    tint = iconColor,
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        } else {
+            Icon(
+                imageVector = icon,
+                contentDescription = contentDescription,
+                tint = iconColor,
+                modifier = Modifier.size(22.dp)
+            )
+        }
+    }
+}
+

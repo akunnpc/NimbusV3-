@@ -86,6 +86,7 @@ data class BrowserUiState(
     val isZoomDialogOpen: Boolean = false,
     val isClearDataDialogOpen: Boolean = false,
     val isQrDialogOpen: Boolean = false,
+    val isBottomBarVisible: Boolean = true,
     val snackbarMessage: String? = null
 ) {
     val activeTab: TabItem
@@ -318,8 +319,17 @@ class BrowserViewModel(application: Application) : AndroidViewModel(application)
     }
 
     // --- Navigation & Web Loading ---
+    fun setBottomBarVisible(visible: Boolean) {
+        if (_uiState.value.isBottomBarVisible != visible) {
+            _uiState.value = _uiState.value.copy(isBottomBarVisible = visible)
+        }
+    }
+
     fun selectTab(tab: NavigationTab) {
-        _uiState.value = _uiState.value.copy(selectedTab = tab)
+        _uiState.value = _uiState.value.copy(
+            selectedTab = tab,
+            isBottomBarVisible = true
+        )
     }
 
     fun onUrlInputChanged(input: String) {
